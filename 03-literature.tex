@@ -3,13 +3,50 @@
 \cleardoubleoddpage%  Make sure to start each chapter on a new odd page
 \chapter{Literature Review}
 
-\section{Anomaly Detection Techniques in Respiratory Sound Analysis}
-\subsection{The Respiratory Sound Database}
-\subsection{Existing Approaches}
+\section{Current State of Respiratory Sound Analysis}
+Lung auscultation is the standard method of diagnosing respiratory disease by listening to the patient's lungs through the chest. However, this approach, which relies on manual assessment by healthcare professionals, has several limitations. Its effectiveness depends on the physician's skill, experience and auditory sensitivity, leading to potential inaccuracies in diagnosis~\cite{palaniappan2013computer}. In addition, manual auscultation is typically limited to clinical settings, missing critical auditory cues that may occur outside of these settings, such as nocturnal breath sounds common in conditions such as asthma~\cite{pramono2017automatic}. \\
+These limitations, combined with advances in technology, have led to the development of computerized respiratory sound analysis. In this approach, lung sounds are digitally recorded and then analyzed. Early techniques focused on the graphical representation of sound waves, allowing medical professionals to visually identify abnormalities. However, this method did not fully mitigate the risk of human error. Subsequently, statistical approaches were developed to assess the frequency of specific respiratory events based on historical data patterns. According to systematic reviews~\cite{palaniappan2013computer}, machine learning based approaches provide the most promising results, but so far were limited by the lack of sufficiently large data sets.
 
+\subsection{The ICBHI Challenge 2017}
+During the 2017 Annual International Conference on Biomedical and Health Informatics, a central challenge was launched in response to the scarcity of comprehensive lung sound data. This challenge aimed to foster the development and evaluation of advanced algorithms for automated lung sound classification, using a novel dataset curated specifically for this purpose. Known as the Respiratory Sound Database~\cite{rocha2018alpha}, this collection stands out as one of the earliest and most comprehensive publicly available datasets in the field, comprising 6898 respiratory cycles from 126 patients. These recordings, collected by professional teams in Greece and Portugal, represent a diverse range of audio samples, capturing sounds from healthy individuals as well as patients suffering from lung diseases such as COPD, asthma, and bronchiectasis. Each breathing cycle in the database is annotated by domain experts and categorized as normal, with wheezes, with crackles, or with both wheezes and crackles. The challenge encouraged a multitude of submissions, showcasing a range of innovative machine learning approaches. Below, we compare a selection of these methods.
+
+\subsection{Existing Approaches}
+Starting with traditional artificial intelligence methods, Jakovljevi{\'c} and Lon{\v{c}}ar-Turukalo (2018) published their work based on hidden Markov models (HMM) alongside the paper introducing the Respiratory Sound Database.~\cite{jakovljevic2018hidden}. Using MFCCs as features, they employed a four-class classifier with the official 60/40 split at the recording level, using 60\% of the data for training and the remaining 40\% for evaluation. The four classes were healthy, crackles, wheezes, both crackles and wheezes. A balanced accuracy score of 0.39 was achieved, with sensitivity of 0.38 and specificity of 0.41.\\
+Chambres et al. (2018) used boosted decision trees (BDT) to address the four-class classification task~\cite{chambres2018automatic}. They used the same 60/40 split and MFCCs as features. The model architecture significantly improved the balance accuracy to 0.49, with a sensitivity of 0.78 and a specificity of 0.21.\\
+Shortly after, the use of neural networks gained traction. Ma et al. (2019) proposed the use of a bi-ResNet (LungBRN) architecture~\cite{wang2019bi} consisting of multiple concatenated convolutional neural network layers~\cite{ma2019lungbrn}. Using the same split as the other approaches, but using short-time Fourier transform (STFT) and wavelet analysis to extract features, they achieved an official balanced accuracy of 0.5, specificity of 0.69, and sensitivity of 0.31 for the four-class problem.\\
+The Microsoft Research India team around Gairola et al. (2021) published their RepireNet~\cite{gairola2021respirenet} network and benchmarked it in a variety of data splits and in a binary and four-class classification problem. The backbone are blocks of ResNet34~\cite{he2016deep} deep convolutional neural networks (CNN). Using MelSpectrograms as features, their baseline CNN achieved 0.55 balanced accuracy on the official 60/40 split, 0.66 balanced accuracy for the four-class problem on a self-defined random 80/20 split at the breathing cycle level, and 0.72 on the same 80/20 split but treating the problem as a binary classification, which allows for an easier comparison to a anomaly detection setting.\\
+\begin{table}[h!]
+    \centering
+    \caption{
+        Performance comparisons of the showcased models 
+    }
+    \begin{tabularx}{\linewidth}{lXcccc}
+    \toprule
+    \textbf{Model}        & \textbf{Split} & \textbf{Features} & \textbf{Se} & \textbf{Sp} & \textbf{BALACC} \\
+    \midrule
+    HMM                   & 60/40 4 class          & MFCC              & 0.38                & 0.41                 & 0.39 \\
+    BDT                   & 60/40 4 class          & MFCC              & 0.78                & 0.21                 & 0.49 \\
+    LungBRN               & 60/40 4 class          & STFT + Wavelet    & 0.69                & 0.31                 & 0.5  \\
+    RespireNet CNN        & 60/40 4 class          & MelSpectrogram    & 0.39                & 0.71                 & 0.55 \\
+    RespireNet CNN        & 80/20 4 class  & MelSpectrogram    & 0.54                & 0.79                 & 0.66 \\
+    RespireNet CNN        & 80/20 2 class  & MelSpectrogram    & 0.61                & 0.83                 & 0.72 \\
+    \bottomrule
+    \end{tabularx}
+\end{table}
+
+% CHECK ALL RESULTS IF THEY ARE CORRECT!
+    
+It is important to note that all mentioned approaches to respiratory sounds analysis rely on treating it as a supervised classification task. These methods, while effective in their context, assume the availability of extensive labeled data representing various specific respiratory conditions. In real-world scenarios, however, such comprehensive data sets are not always readily available. Furthermore, the strict categorization of respiratory sounds into predefined classes may overlook the nuanced and unpredictable nature of respiratory anomalies. Therefore, the remainder of this thesis will explore respiratory sound analysis through the lens of anomaly detection.
+
+\section{Respiratory Sound Analysis from an Anomaly Detection Perspective}
 \section{Variational Autoencoders}
 
 \section{Group Masked Autoencoders}
+
+% IMPORTANT: Add a section summarizing the findings from the literature review and creating an outline of what will be done in the methodology part
+% We have seen some historical background and the first couple of attempts
+% Highlight the first anomaly detection approach to this
+% G-MADE is left to be tried for anomaly detection in respiratory sounds
 
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
