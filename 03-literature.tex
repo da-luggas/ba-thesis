@@ -39,9 +39,37 @@ The Microsoft Research India team around Gairola et al. (2021) published their R
 It is important to note that all mentioned approaches to respiratory sounds analysis rely on treating it as a supervised classification task. These methods, while effective in their context, assume the availability of extensive labeled data representing various specific respiratory conditions. In real-world scenarios, however, such comprehensive data sets are not always readily available. Furthermore, the strict categorization of respiratory sounds into predefined classes may overlook the nuanced and unpredictable nature of respiratory anomalies. Therefore, the remainder of this thesis will explore respiratory sound analysis through the lens of anomaly detection.
 
 \section{Respiratory Sound Analysis from an Anomaly Detection Perspective}
+The use of anomaly detection methods to solve sound analysis problems is not a new concept. In particular, these methods have proven their effectiveness in the field of industrial sound analysis, as demonstrated in Task 2 of the annual DCASE Challenge~\cite{dcaseDCASE2023Challenge}, where machine condition monitoring is performed by observing the sound produced by these machines. The sound emitted can be either normal or anomalous, and machine learning algorithms learn to understand the characteristics of healthy machine sounds in order to accurately predict machine failure in the case of anomalous sounds such as rattling or whirring.\\
+A similar approach can be used in breathing sound analysis. The different anomalous respiratory sounds can all be grouped into a single anomaly class, and anomaly detection models can learn the constitution of healthy respiratory cycles. If a sample deviates significantly from the learned representation of a healthy sound, the system can flag it as anomalous.
+
+
 \section{Variational Autoencoders}
+Cozzatti et al. (2022)~\cite{cozzatti2022variational} explored the first anomaly detection approach to the respiratory sound database. In their work, MFCCs were used as features and the breathing cycles containing wheezes, crackles or both were all summarized in an anomaly class. A Variational Autoencoder (VAE) was trained using only known healthy breathing cycles.\\
+Variational Autoencoders are similar to Autoencoders in that they consist of an encoder and a decoder part. The encoder of a VAE, by comparison, uses variational inference to output the parameters of a continuous and easily sampled distribution, usually the mean and standard deviation of a  Gaussian~\cite{cozzatti2022variational}. As a result, the input to the decoder is a single sample from that predicted distribution. This allows the model to provide a measure of certainty of the reconstruced data using the variability of the latent space~\cite{an2015variational}.\\
+
+% Maybe include an illustration of VAE?
+
+By training the VAE with normal sounds only, it learns to accurately reconstruct physiological respiratory cycles. The reconstruction error reported by the model is small in this case. When the model attempts to reconstruct a respiratory sound with pathologies, the parameters of the Gaussian will most likely not match the parameters of the learned distribution of healthy sounds, and thus the reconstruction will have a higher error. The paper then used a small subset of the original dataset, containing both healthy and unhealthy lung sounds, to determine a threshold in the reconstruction error above which all higher errors should be marked as anomalous, making the process weakly supervised. The proposed model achieved competitive results in the binary class problem, with a balanced accuracy of 0.57 for the official 60/40 split and 0.6 for a random 80/20 split.
+
+\begin{table}[h!]
+    \centering
+    \caption{Performance of the proposed method}
+    \begin{tabular}{cccccc}
+    \toprule
+    \textbf{Split} & \textbf{Se} & \textbf{Sp} & \textbf{BALACC} \\
+    \midrule
+    60/40 & 0.33 & 0.80 & 0.57 \\
+    80/20 & 0.58 & 0.61 & 0.60 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
 
 \section{Group Masked Autoencoders}
+In \autoref{theory:made}, we have discussed how Masked Autoencoders are an alternative anomaly detection approach to generative models by evaluating probability densities. The basic concept focused on modifying an existing autoencoder structure to satisfy the autoregressive property by masking the weights of the neural network layers so that each output dimension depends only on the preceding input dimensions.\\
+When dealing with representations of sound data, such as MelSpectrograms or MFCCS, the interest shifts from the autoregressive ordering of individual input dimensions to the ordering of sound frames. Here, Group Masked Autoencoders (GMADE)~\cite{Giri2020} provide a more tailored approach for audio anomaly detection tasks where temporal context is important. GMADE differs from traditional MADE in that it does not split the joint distribution into individual dimensional conditions, but rather over grouped frames. This approach is particularly relevant when dealing with sound data, where each time frame in a MelSpectrogram is considered a separate group.\\
+In GMADE, the input space has the dimensionality $T\times M$, where $T$ is the number of frames concatenated in the input and $M$ is the number of Mel frequency bands. If an input sample can be thought of as $\mathbf{t}=[\mathbf{t_{i+1}}, \mathbf{t_{i+2}},... ,\mathbf{t_{i+T}}]$ with $\mathbf{t_{i}}\in \mathbb{R}^{M\times 1}$, the joint density can be decomposed as \[ p(\mathbf{t})=\sum_{i=1}^{T}p(\mathbf{t_i}|\mathbf{t}_{<i}) \] where the probability of each frame depends on all previous frames and their mel bins and no other frames~\cite{Giri2020}. To maintain the autoregressive property, the generation of the weight matrices must be slightly adapted from the MADE approach to assign labels to the neurons only from $1$ to $T-1$ to correctly zero connections between groups instead of units.\\
+The paper also explored orderings other than causal, where a frame can only depend on its predecessors. Backward ordering predicts the probability density of frames given only their succeeding frames, while middle frame ordering attempts to predict the middle frame given only the frames surrounding it. Ensembles of all three approaches were also evaluated. GMADE achieved state of the art results in Task 2 of the DCASE Challenge 2020 in the machine condition monitoring task, especially for non-stationary sounds. While this is promising for respiratory sound analysis due to the non-stationary nature of lung sounds, the efficacy of GMADE in detecting anomalies in respiratory sounds is yet to be tested.
 
 % IMPORTANT: Add a section summarizing the findings from the literature review and creating an outline of what will be done in the methodology part
 % We have seen some historical background and the first couple of attempts

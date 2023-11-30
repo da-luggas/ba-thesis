@@ -20,6 +20,7 @@ Knowing what constitutes physiological and pathological pulmonary sounds, it is 
 Anomaly detection addresses the task of identifying deviations in data from anticipated patterns, commonly termed as anomalies or outliers~\cite{chandola2009anomaly}. These anomalies often signal deviations of a system from the norm that are potentially critical and require intervention by the system user. In healthcare, as discussed in \autoref{theory:sounds}, outliers in patient respiratory sound patterns can indicate certain conditions. \\
 To find these outliers, anomaly detection algorithms typically define a certain concept of what is considered normal, and any data point that deviates is flagged as an anomaly. The major challenge here is that anomalies are rare and usually not available on a large scale, resulting in a huge data imbalance. In addition, the distribution of anomalies remains uncertain, and even within the set of outliers there may be substantial variation, as data can exhibit various forms of non-normality~\cite{pang2021deep}. In addition, it is important to strike a balance between false positives and false negatives based on the specific application domain, as the severity of one over the other can vary significantly. Outlier detection systems must be properly calibrated to match the characteristics of the domain.\\
 Anomaly detection includes different modes depending on the available data. The simplest, but less common in practical scenarios, is \textit{supervised anomaly detection}. In this approach, a fully labeled dataset is used and the task of the detection system is to determine the boundary between normal and abnormal data points. However, it's important to note that real-world datasets often lack comprehensive coverage of different outlier types, making \textit{unsupervised anomaly detection} more prevalent. In unsupervised anomaly detection, only data points known to be normal are provided, and the system must autonomously learn their defining characteristics. Between these two extremes, there are intermediate modes. In our research, we will address the challenge of \textit{weakly supervised} data, where primarily normal data points are available, but a subset of anomalies is also included to evaluate the real-world effectiveness of the learned representation within a detection system. \\
+% MENTION WHY WEAKLY SUPERVISED MAKES SENSE SO YOU NEED LESS ANOMALOUS DATA POINTS COMPARED TO SUPERVISED
 % Not very happy about this part
 % Maybe also talk about the deviation based, proximity based and statistical anomaly detection
 % mention that both of the following are non-supervised
@@ -51,6 +52,7 @@ Density estimation is well suited for anomaly detection tasks. By estimating the
 
 % Maybe include a graphic showing the distribution
 \subsection{Introduction to Masked Autoencoders}
+\label{theory:made}
 Masked Autoencoders for Distribution Estimation (MADE) aims to modify autoencoders so that they don't just learn to compress and reconstruct data, but also to understand how the data is distributed. The notion of autoregressive property is essential. While traditional autoencoders do not consider the order of the input data, MADE introduces a mechanism where each part of its output is determined only by the parts of the input that precede it.\\
 To ensure this ordering, MADE masks the weights of each autoencoder layer to control the information flow between neurons of two layers. Each neuron is thereby given a label, a number between $1$ and $D-1$, where $D$ is the dimensionality of the input. The masks are then built using this general rule: a neuron in layer $l$ (called $k'$) can only be connected to a neuron in the previous layer $l-1$ (called $k$) if its label is greater than or equal to the label of $k$. This can be mathematically expressed as:
 \[ M^{\mathbf{W}^l}_{k',k}=\begin{cases}
@@ -58,7 +60,11 @@ To ensure this ordering, MADE masks the weights of each autoencoder layer to con
     0, & \text{otherwise.}
   \end{cases} \]
 Here, $M^{\mathbf{W}^l}_{k',k}$ is the weight matrix mask that determines whether a connection is allowed or not. To strictly maintain the autoregressive property, the rule for the output layer must be slightly modified. Here, a neuron in the last hidden layer can only influence an output neuron if its label is strictly smaller~\cite{germain2015made}.\\
-In summary, MADE provides a solution for controlling the flow of information in an autoencoder so that each part of the output depends only on the preceding parts of the input, providing a probabilistic model that can be further used for anomaly detection.
+In summary, MADE provides a solution for controlling the flow of information in an autoencoder so that each part of the output depends only on the preceding parts of the input. The probability of observing the input $\mathbf{x}$ can be calculated as
+\[ p(\mathbf{x}) = \sum_{d=1}^{D} p(x_d | \mathbf{x}_{<d}) .\]
+This provides a probabilistic model that can be further used for anomaly detection.
+
+% IMPORTANT: INCLUDE FORMULA HOW PROBABILITY IS CALCULATED
 
 % Benefits
 % Include graphic that shows the probabilities being output can be used to get p(x)
