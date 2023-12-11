@@ -2,10 +2,116 @@
 %% 
 \cleardoubleoddpage%  Make sure to start each chapter on a new odd page
 \chapter{Experiments and Results}
-
 \section{Experimental Setup}
+We conducted our experiments on a machine equipped with an AMD Ryzen 5 1600 CPU and a NVIDIA GeForce GTX 1070 GPU. The initial step involved establishing a baseline performance to later asses both models under various conditions. We utilized the PyTorch framework~\cite{paszke2019pytorch} for training, taking advantage of its pre-built functions for neural network training. The Adam optimizer was employed throughout the training processes, along with the \lstinline{ReduceLROnPlateau} learning rate scheduler set to a patience of 5 epochs. Additionally, we implemented early stopping, evaluating the model's performance on the validation set after each training epoch, with a patience threshold of 10 epochs.\\
+For optimal baseline determination, we used the Optuna framework~\cite{akiba2019optuna} for hyperparameter optimization. The objectives included maximizing the AUC-Score and Balanced Accuracy on the validation set while minimizing the epochs required to achieve respectable results. This process yielded the following hyperparameters for our models:\\\\
+\textbf{VAE}: The optimal batch size was determined to be 32, with a learning rate of 1e-4. The \textit{nf} hyperparameter in the DCGAN architecture, which affects the depth of feature maps in both the generator and discriminator, was found to be most effective at 128. The size of the latent space vector was set to 128, and the alpha weighting factor balancing the Mean Squared Error loss and the Kullback-Leibler Divergence was adjusted to 0.5.\\\\
+\textbf{GMADE}: A batch size of 128 and a learning rate of 1e-3 were optimal for this model. Using a single mask configuration without resampling the mask during training, we achieved the best results with a hidden layer structure of [256, 156, 512].
 \section{Generalization Capabilities}
+The ability of a machine learning model to generalize to unseen data is as crucial as its performance during training. We evaluated the generalization of our models using the test set, as described in \autoref{method:data-splitting}, with an 80/20 split. We assessed all three input orderings and their mean ensemble for the G-MADE model.\\
+We established a binary classification threshold based on anomaly scores to gauge the Balanced Accuracy, True Positive Rate (TPR), and True Negative Rate (TNR). This threshold was determined using the validation set, which includes some anomalous data. We tested each anomaly score as a potential threshold, selecting the one that maximized balanced accuracy on the validation set. This approach underpins the weakly-supervised aspect of our methodology.
+
+\begin{table}[h!]
+    \centering
+    \caption{Experiment Results for VAE and G-MADE Models with Different Orderings}
+    \begin{tabular}{|l|l|c|c|}
+    \hline
+    \textbf{Model} & \textbf{Metric} & \textbf{Validation Set} & \textbf{Test Set} \\
+    \hline
+    \multirow{4}{*}{VAE} 
+    & ROC-AUC & \textbf{0.64} & \textbf{0.62} \\
+    & BALACC  & \textbf{0.61} & \textbf{0.61} \\
+    & TPR     & 0.84 & 0.84 \\
+    & TNR     & 0.39 & 0.39 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Forward)}
+    & ROC-AUC & 0.59 & 0.57 \\
+    & BALACC  & 0.57 & 0.57 \\
+    & TPR     & \textbf{0.90} & \textbf{0.90} \\
+    & TNR     & 0.24 & 0.24 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Backward)}
+    & ROC-AUC & 0.58 & 0.57 \\
+    & BALACC  & 0.57 & 0.57 \\
+    & TPR     & 0.78 & 0.78 \\
+    & TNR     & 0.36 & 0.37 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Mid-Frame)}
+    & ROC-AUC & 0.56 & 0.55 \\
+    & BALACC  & 0.56 & 0.57 \\
+    & TPR     & 0.86 & 0.86 \\
+    & TNR     & 0.27 & 0.29 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Ensemble)}
+    & ROC-AUC & 0.59 & 0.58 \\
+    & BALACC  & 0.57 & 0.56 \\
+    & TPR     & 0.71 & 0.70 \\
+    & TNR     & \textbf{0.42} & \textbf{0.43} \\
+    \hline
+    \end{tabular}
+\end{table}
+
+Our performance results indicate that with its reconstruction-based approach, the Variational Autoencoder (VAE) slightly outperforms the G-MADE models in accuracy and AUC-Score. However, all models show a notable number of false positives, possibly due to the high environmental noise in the recordings the models assume to be anomalies. The ensemble G-MADE model demonstrated the highest TNR, indicating a better balance in minimizing false positives while identifying healthy patients. Interestingly, while the ensemble improved the TNR and the AUC-Score marginally, it did not enhance the balanced accuracy compared to individual orderings due to the lower TPR.\\
+All models are competitive to the weakly-supervised approach introduced by~\cite{cozzatti2022variational} and allow for a more nuanced inspection of the capabilities of the models.
 \section{Age and Gender Differences in Model Accuracy}
+Machine learning algorithms often suffer from imbalances in gender representation, mainly due to insufficient data from females, youths, and older individuals. This imbalance is critical in medical applications where fairness across different genders and age groups must be assured. To address this, we evaluated our models' performance on various subgroups within our dataset, using thresholds established as previously described.\\
+\textbf{Gender}: We analyzed the models' performance by filtering the test set for male and female samples separately.
+
+\begin{table}[h!]
+    \centering
+    \caption{Experiment Results by Gender for VAE and G-MADE Models}
+    \begin{tabular}{|l||c|c||c|c||c|c||c|c|}
+    \hline
+    \textbf{Model} & \multicolumn{2}{c||}{\textbf{ROC-AUC}} & \multicolumn{2}{c||}{\textbf{BALACC}} & \multicolumn{2}{c||}{\textbf{TPR}} & \multicolumn{2}{c|}{\textbf{TNR}} \\
+    \cline{2-9}
+    & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} \\
+    \hline
+    VAE & \textbf{0.59} & \textbf{0.64} & \textbf{0.59} & \textbf{0.61} & 0.81 & 0.84 & \textbf{0.37} & 0.39 \\
+    G-MADE (Forward) & 0.55 & 0.58 & 0.58 & 0.56 & \textbf{0.92} & \textbf{0.89} & 0.25 & 0.23 \\
+    G-MADE (Backward) & 0.54 & 0.58 & 0.54 & 0.6 & 0.75 & 0.80 & 0.33 & 0.39 \\
+    G-MADE (Mid-Frame) & 0.52 & 0.57 & 0.56 & 0.58 & 0.84 & 0.87 & 0.27 & 0.29 \\
+    G-MADE (Ensemble) & \textbf{0.59} & 0.59 & 0.56 & 0.56 & 0.88 & 0.60 & 0.24 & \textbf{0.52} \\
+    \hline
+    \end{tabular}
+\end{table}
+
+The VAE model consistently outperforms in male and female subsets but exhibits a lower accuracy for female recordings. While showing equal accuracy across genders and reaching the VAE's accuracy in the female subset, the ensemble G-MADE only falls short slightly of the VAE's performance in the male subset. The forward-ordered G-MADE, despite a high True Positive Rate (TPR), has many false positives. All models except for the ensemble G-MADE show a lower accuracy for female data and is likely due to an imbalance in the dataset. Of 6.898 breathing cycles, 4.485 are from male patients, and only 2.413 are from female patients.\\\\
+\textbf{Age}: We categorized recordings into three age groups: (0-7], (7-70], and (70-85]. These groups were chosen for their comparative size and representativeness, with the youngest patient being less than a year old and the oldest at 85.
+
+\begin{table}[h!]
+    \centering
+    \caption{Performance by Age Group for VAE and G-MADE Models}
+    \begin{tabular}{|l|l|c|c|c|c|}
+    \hline
+    \textbf{Age Group} & \textbf{Model} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} \\
+    \hline
+    \multirow{5}{*}{(0-7]} 
+    & VAE & 0.49 & 0.52 & 0.25 & \textbf(0.8) \\
+    & G-MADE (Forward) & 0.50 & 0.47 & 0.48 & 0.47 \\
+    & G-MADE (Backward) & 0.52 & \textbf(0.53) & 0.33 & 0.73 \\
+    & G-MADE (Mid-Frame) & 0.52 & 0.51 & 0.46 & 0.56 \\
+    & G-MADE (Ensemble) & \textbf(0.59) & 0.52 & \textbf(0.98) & 0.06 \\
+    \hline
+    \multirow{5}{*}{(7-70]} 
+    & VAE & \textbf(0.6) & \textbf(0.58) & 0.85 & 0.30 \\
+    & G-MADE (Forward) & 0.56 & 0.54 & \textbf(0.90) & 0.18 \\
+    & G-MADE (Backward) & 0.55 & 0.56 & 0.83 & 0.30 \\
+    & G-MADE (Mid-Frame) & 0.54 & 0.55 & 0.83 & 0.30 \\
+    & G-MADE (Ensemble) & 0.59 & 0.54 & 0.25 & \textbf(0.82) \\
+    \hline
+    \multirow{5}{*}{(70-85]} 
+    & VAE & \textbf(0.6) & \textbf(0.59) & 0.83 & 0.34 \\
+    & G-MADE (Forward) & 0.56 & 0.54 & \textbf(0.9) & 0.18 \\
+    & G-MADE (Backward) & 0.55 & 0.56 & 0.83 & 0.30 \\
+    & G-MADE (Mid-Frame) & 0.54 & 0.55 & 0.87 & 0.22 \\
+    & G-MADE (Ensemble) & 0.59 & 0.54 & 0.25 & \textbf(0.82) \\
+    \hline
+    \end{tabular}
+\end{table}
+
+A distinct pattern emerges: all models struggle with recordings from the (0-7] age group. Unlike older age groups, where anomalies are detected more reliably but with higher false positives, younger patients' anomalies are often missed, while normal conditions are identified more accurately. Despite its high accuracy in this group, the ensemble G-MADE model achieves this by classifying nearly every data point as anomalous, rendering it unable to separate normal from abnormal data points. The backward G-MADE model presents a more balanced performance within the youngest age group.\\
+The difficulty in analyzing younger patients' data could stem from their faster breathing cycles compared to older subjects. The average cycle length for patients older than seven is 2.37 seconds, while for those seven or younger, it is 1.64 seconds, potentially making anomalous sounds too short for effective detection.
+
 \section{Model Sensitivity to Noise}
 \section{Model Performance on Crackles and Wheezes}
 \section{Impact of Hyperparameter Variations}
