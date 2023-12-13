@@ -66,16 +66,16 @@ Machine learning algorithms often suffer from imbalances in gender representatio
     \cline{2-9}
     & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} & \textbf{F} & \textbf{M} \\
     \hline
-    VAE & \textbf{0.59} & \textbf{0.64} & \textbf{0.59} & \textbf{0.61} & 0.81 & 0.84 & \textbf{0.37} & 0.39 \\
+    VAE & \textbf{0.59} & \textbf{0.64} & \textbf{0.59} & \textbf{0.61} & 0.81 & 0.84 & 0.37 & 0.39 \\
     G-MADE (Forward) & 0.55 & 0.58 & 0.58 & 0.56 & \textbf{0.92} & \textbf{0.89} & 0.25 & 0.23 \\
     G-MADE (Backward) & 0.54 & 0.58 & 0.54 & 0.6 & 0.75 & 0.80 & 0.33 & 0.39 \\
     G-MADE (Mid-Frame) & 0.52 & 0.57 & 0.56 & 0.58 & 0.84 & 0.87 & 0.27 & 0.29 \\
-    G-MADE (Ensemble) & \textbf{0.59} & 0.59 & 0.56 & 0.56 & 0.88 & 0.60 & 0.24 & \textbf{0.52} \\
+    G-MADE (Ensemble) & 0.56 & 0.59 & 0.56 & 0.56 & 0.68 & 0.7 & \textbf{0.44} & \textbf{0.42} \\
     \hline
     \end{tabular}
 \end{table}
-
-The VAE model consistently outperforms in male and female subsets but exhibits a lower accuracy for female recordings. While showing equal accuracy across genders and reaching the VAE's accuracy in the female subset, the ensemble G-MADE only falls short slightly of the VAE's performance in the male subset. The forward-ordered G-MADE, despite a high True Positive Rate (TPR), has many false positives. All models except for the ensemble G-MADE show a lower accuracy for female data and is likely due to an imbalance in the dataset. Of 6.898 breathing cycles, 4.485 are from male patients, and only 2.413 are from female patients.\\\\
+All models, except the ensemble G-MADE, display reduced accuracy for female recordings. Interestingly, the ensemble G-MADE maintains equal balanced accuracy across genders, although it exhibits a slightly lower AUC-Score for females. Among all models, the VAE consistently performs better in both male and female subsets. However, the difference in its accuracy between genders is more pronounced than in the ensemble G-MADE. Despite achieving a high True Positive Rate, the forward-ordered G-MADE tends to generate many false positives. In contrast, the Ensemble achieves the highest True Negative Rate (TNR).\\
+This observed discrepancy in gender-based accuracy is likely due to an imbalance in the dataset composition. Of the 6.898 recorded breathing cycles, 4.485 originate from male patients, while only 2.413 are from female patients, suggesting a potential bias in data representation.\\\\
 \textbf{Age}: We categorized recordings into three age groups: (0-7], (7-70], and (70-85]. These groups were chosen for their comparative size and representativeness, with the youngest patient being less than a year old and the oldest at 85.
 
 \begin{table}[h!]
@@ -87,38 +87,168 @@ The VAE model consistently outperforms in male and female subsets but exhibits a
     \hline
     \multirow{5}{*}{(0-7]} 
     & VAE & 0.49 & 0.52 & 0.25 & \textbf(0.8) \\
-    & G-MADE (Forward) & 0.50 & 0.47 & 0.48 & 0.47 \\
-    & G-MADE (Backward) & 0.52 & \textbf(0.53) & 0.33 & 0.73 \\
+    & G-MADE (Forward) & 0.50 & 0.47 & \textbf(0.48) & 0.47 \\
+    & G-MADE (Backward) & 0.52 & 0.53 & 0.33 & 0.73 \\
     & G-MADE (Mid-Frame) & 0.52 & 0.51 & 0.46 & 0.56 \\
-    & G-MADE (Ensemble) & \textbf(0.59) & 0.52 & \textbf(0.98) & 0.06 \\
+    & G-MADE (Ensemble) & \textbf(0.62) & \textbf(0.56) & 0.36 & 0.76 \\
     \hline
     \multirow{5}{*}{(7-70]} 
     & VAE & \textbf(0.6) & \textbf(0.58) & 0.85 & 0.30 \\
     & G-MADE (Forward) & 0.56 & 0.54 & \textbf(0.90) & 0.18 \\
     & G-MADE (Backward) & 0.55 & 0.56 & 0.83 & 0.30 \\
     & G-MADE (Mid-Frame) & 0.54 & 0.55 & 0.83 & 0.30 \\
-    & G-MADE (Ensemble) & 0.59 & 0.54 & 0.25 & \textbf(0.82) \\
+    & G-MADE (Ensemble) & 0.56 & 0.54 & 0.69 & \textbf(0.39) \\
     \hline
     \multirow{5}{*}{(70-85]} 
     & VAE & \textbf(0.6) & \textbf(0.59) & 0.83 & 0.34 \\
     & G-MADE (Forward) & 0.56 & 0.54 & \textbf(0.9) & 0.18 \\
     & G-MADE (Backward) & 0.55 & 0.56 & 0.83 & 0.30 \\
     & G-MADE (Mid-Frame) & 0.54 & 0.55 & 0.87 & 0.22 \\
-    & G-MADE (Ensemble) & 0.59 & 0.54 & 0.25 & \textbf(0.82) \\
+    & G-MADE (Ensemble) & 0.52 & 0.54 & 0.73 & \textbf(0.35) \\
     \hline
     \end{tabular}
 \end{table}
 
-A distinct pattern emerges: all models struggle with recordings from the (0-7] age group. Unlike older age groups, where anomalies are detected more reliably but with higher false positives, younger patients' anomalies are often missed, while normal conditions are identified more accurately. Despite its high accuracy in this group, the ensemble G-MADE model achieves this by classifying nearly every data point as anomalous, rendering it unable to separate normal from abnormal data points. The backward G-MADE model presents a more balanced performance within the youngest age group.\\
+A distinct pattern emerges: almost all models struggle with recordings from the (0-7] age group. Unlike older age groups, where anomalies are detected more reliably but with higher false positives, younger patients' anomalies are often missed, while normal conditions are identified more accurately. The exception is the ensemble G-MADE, which is still able to achieve a respectable accuracy in the youngest group, outperforming all individual orderings and VAE. In the older groups, VAE is performing better than G-MADE.\\
 The difficulty in analyzing younger patients' data could stem from their faster breathing cycles compared to older subjects. The average cycle length for patients older than seven is 2.37 seconds, while for those seven or younger, it is 1.64 seconds, potentially making anomalous sounds too short for effective detection.
 
 \section{Model Sensitivity to Noise}
-\section{Model Performance on Crackles and Wheezes}
-\section{Impact of Hyperparameter Variations}
-\section{Assessment of Data Splitting at Recording Level}
-\section{Comparison of Feature Extraction Methods: MFCC vs. MelSpectrogram}
-\section{Interpretability and Explainability of the Proposed Models}
-\section{Comparative Analysis and Discussion}
+A critical measure of a model's practical applicability is its tolerance to noise. We assessed the resilience of our models against varying noise levels. Noise was generated by sampling from a normal distribution and added to the test set's signal at different Signal to Noise Ratios (SNRs) using PyTorch's \lstinline{torchaudio.functional.add_noise}. SNR, measured in decibels, compares the background noise level to the original signal strength. A lower SNR indicates stronger noise: positive SNR values imply the signal is stronger than the noise, negative values indicate the noise is stronger, and 0 dB SNR signifies equal loudness for both noise and signal.\\
+Our investigation began with an SNR of 30 dB, where the original signal was dominant, and progressively increased the noise level to 20 dB, 10 dB, and finally 0 dB. We then plotted the Balanced Accuracy of our models against these SNR values.
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/snr_balacc}
+    \caption{
+    Balanced Accuracy vs SNR Noise Level for Different Models
+}
+\end{figure}
 
+As anticipated, the Balanced Accuracy of all models decreases with increasing noise. While we observed near-original performance at 30 dB SNR, a significant drop is noticeable at 20dB for all G-MADE models. Interestingly, the VAE could keep the same accuracy at 20dB SNR compared to 30dB SNR and performs best at these levels of noise. However, all models fail to have meaningful separation power from 10dB SNR.\\
+It is noteworthy that the original signal already contained substantial environmental noise. Nevertheless, the VAE seems to be more robust against noise in the sound signal.
+\section{Model Performance on Crackles and Wheezes}
+The ability to distinguish between crackles and wheezes is vital in diagnosing different respiratory conditions, given their distinct acoustic characteristics. To assess this, we modified the test set to evaluate performance with crackles and wheezes separately, alongside healthy sounds.
+
+\begin{table}[h!]
+    \centering
+    \caption{Model Performance for Crackles and Wheezes}
+    \begin{tabular}{|l|c|c|c|c||c|c|c|c|}
+    \hline
+    & \multicolumn{4}{c||}{\textbf{Crackles}} & \multicolumn{4}{c|}{\textbf{Wheezes}} \\
+    \cline{2-9}
+    \textbf{Model} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} \\
+    \hline
+    VAE & \textbf{0.60} & \textbf{0.60} & 0.81 & 0.38 & \textbf{0.64} & \textbf{0.61} & 0.84 & 0.37 \\
+    G-MADE (Forward) & 0.55 & 0.57 & \textbf{0.91} & 0.24 & 0.57 & 0.55 & 0.87 & 0.23 \\
+    G-MADE (Backward) & 0.55 & 0.56 & 0.75 & 0.36 & 0.59 & 0.59 & 0.82 & 0.37 \\
+    G-MADE (Mid-Frame) & 0.53 & 0.56 & 0.84 & 0.29 & 0.58 & 0.57 & \textbf{0.86} & 0.29 \\
+    G-MADE (Ensemble) & 0.57 & 0.56 & 0.7 & \textbf{0.43} & 0.57 & 0.55 & 0.67 & \textbf{0.43} \\
+    \hline
+    \end{tabular}
+\end{table}
+
+The results do not indicate a clear trend between the performance for wheezes and crackles. While the AUC-Scores for wheezes is higher than those for crackles, the balanced accuracy does not confirm this tendency. Among the G-MADE models, backward ordering performs most effectively on wheezes, whereas forward ordering is most effective on crackles. Notably, the VAE model consistently achieves the highest accuracy for wheezes and crackles. Interestingly, as seen in previous tests, the ensemble G-MADE exhibits the highest True Negative Rate (TNR) for both crackles and wheezes.\\
+Considering the dataset distribution of 1.864 crackles to 886 wheezes, it is intriguing that the models perform similar across crackles and wheezes despite their substantially lower representation. It shows that the models are able to detect both respiratory phenomena.
+
+\section{Impact of Hyperparameter Variations}
+Optimizing hyperparameters is a crucial yet challenging task in machine learning model training. We utilized the Optuna optimization framework for our models, conducting 30 studies for each model to analyze the relative importance of various hyperparameters in achieving high balanced accuracy. A higher value indicates greater importance, suggesting that a modification in that hyperparameter would significantly impact the results.
+
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/importances_vae}
+    \caption{
+    Hyperparameter performance in VAE training
+}
+\end{figure}
+
+In the case of the Variational Autoencoder (VAE), the most influential factor is the \lstinline{alpha} weighting term, which balances the Mean Square Error and Kullback-Leibler Divergence in the overall loss function. The \lstinline{beta1} parameter of the Adam optimizer and the dimension of the latent vector (\lstinline{nz}) also play significant roles. Interestingly, the \lstinline{nf} parameter, which affects the feature depth in the DCGAN Generator and Discriminator, has a minimal impact on overall model performance.
+
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/importances_gmade}
+    \caption{
+    Hyperparameter performance in G-MADE (forward) training
+}
+\end{figure}
+
+The G-MADE model, featuring hyperparameters for its hidden layers, inherently requires more tuning than the VAE. The size of the first hidden layer is paramount in training G-MADE, followed by the frequency of mask resampling during forward passes. The subsequent hidden layers, the number of different weight masks, and the frequency of mask resampling per forward pass all show similar and relatively low importance.
+
+\section{Assessment of Data Splitting at Recording Level}
+In line with concerns mentioned in \autoref{method:data-splitting}, splitting data at the breathing cycle level risks overestimating the model generalization capabilities, as cycles from the same patient might appear in training and test sets. To address this, we examined the impact of our custom-designed recording level split on model performance.
+
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/split_performance}
+    \caption{
+    Model performance on different data split
+}
+\end{figure}
+
+The results demonstrate effective generalization across models for both data splits. However, an interesting trend can be observed: while the test set performance was marginally lower than the validation set for the breathing cycle level split, it improved for the recording level split. This improvement in the test set performance for the recording level split might be attributed to a fortunate data division, indicating that the split could be unintentionally biased or more representative of the model's capabilities.
+
+\section{Comparison of Feature Extraction Methods: MFCC vs. MelSpectrogram}
+MFCCs and MelSpectrograms are widespread for representing sound data in machine learning but offer different advantages. MelSpectrograms are known for better human interpretability and retaining more temporal information compared to MFCCs. To evaluate the impact of these differences, we adapted our preprocessing as described in \autoref{method:preprocessing}, replacing \lstinline{torchaudio.transforms.MFCC} with \lstinline{torchaudio.transforms.MelSpectrogram} and retrained all models with the new feature representation.
+
+\begin{table}[h!]
+    \centering
+    \caption{Experiment Results for VAE and G-MADE Models using MelSpectrograms}
+    \begin{tabular}{|l|l|c|c|c|}
+    \hline
+    \textbf{Model} & \textbf{Metric} & \textbf{Validation Set} & \textbf{Test Set} & \textbf{Test Set (Dropout)} \\
+    \hline
+    \multirow{4}{*}{VAE} 
+    & ROC-AUC & 0.46 & 0.44 & - \\
+    & BALACC  & 0.51 & 0.5 & - \\
+    & TPR     & 0.98 & 0.96 & - \\
+    & TNR     & 0.04 & 0.04 & - \\
+    \hline
+    \multirow{4}{*}{G-MADE (Forward)}
+    & ROC-AUC & \textbf{0.57} & \textbf{0.54} & \textbf{0.55} \\
+    & BALACC  & \textbf{0.56} & \textbf{0.53} & 0.56 \\
+    & TPR     & 0.36 & 0.34 & 0.88 \\
+    & TNR     & 0.77 & 0.71 & 0.24 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Backward)}
+    & ROC-AUC & 0.39 & 0.39 & 0.4 \\
+    & BALACC  & 0.50 & 0.50 & 0.5 \\
+    & TPR     & 1.0 & 1.0 & 1.0 \\
+    & TNR     & 0.0 & 0.0 & 0.0 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Mid-Frame)}
+    & ROC-AUC & 0.49 & 0.44 & 0.54 \\
+    & BALACC  & 0.54 & 0.51 & 0.56 \\
+    & TPR     & 0.28 & 0.28 & 0.92 \\
+    & TNR     & 0.80 & 0.75 & 0.20 \\
+    \hline
+    \multirow{4}{*}{G-MADE (Ensemble)}
+    & ROC-AUC & 0.5 & 0.46 & 0.53 \\
+    & BALACC  & 0.54 & 0.50 & \textbf{0.57} \\
+    & TPR     & 0.41 & 0.37 & 0.91 \\
+    & TNR     & 0.68 & 0.63 & 0.22 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+Our findings reveal a significant variance in model performance when using MelSpectrograms compared to MFCCs. The Variational Autoencoder (VAE) could not learn any representation of normal data points, as indicated by the accuracy close to random behavior. The forward G-MADE model maintains performance close to its MFCC counterpart but shows reduced generalization to the test set. The backward, mid-frame, and ensemble G-MADE models suffer notable performance declines, especially in test set generalization.\\
+Incorporating dropout (with $p=0.3$) in the Masked Autoencoder models improved their generalization capabilities. Notably, the forward, ensemble and mid-frame G-MADE models approached performances similar to those achieved with MFCCs. However, the backward ordering model failed to benefit from dropout and could not learn any meaningful pattern.\\
+These results suggest that G-MADE models possess a degree of flexibility regarding input features, effectively accommodating both MelSpectrograms and MFCCs. However, our implementation of the Variational Autoencoder did not perform as well with MelSpectrograms. This could imply that the VAE architecture is struggling with the level of detail in the MelSpectrogram representation and can not retrieve the characteristics that make up a normal breathing cycle and may be more suited to the feature representation provided by MFCCs due to their compact and efficient encapsulation of relevant sound characteristics. Further refinements in the VAE's architecture or its training process might be needed to handle better the richer temporal information presented by MelSpectrograms.
+
+\section{Comparative Analysis and Discussion}
+We now want to provide a comprehensive analysis and discussion of the experiments' findings to determine how well reconstruction-based and density-estimation-based methods are suited for anomaly detection in respiratory sounds.
+The Variational Autoencoder (VAE), our reconstruction-based model, showed significant effectiveness in our experiments. Its primary strength lies in its ability to learn a compact representation of normal breathing cycles, facilitating effective anomaly detection through reconstruction error measurement. Across various datasets, including different noise levels, age groups, and genders, the VAE consistently outperformed with higher AUC-Score and Balanced Accuracy.\\
+Despite these strengths, the VAE's performance was less effective with MelSpectrograms, indicating a possible limitation in processing rich temporal information. Additionally, the VAE demonstrated greater variance in accuracy between genders and age groups, suggesting a potential sensitivity to data imbalances.\\
+G-MADE, employing density estimation, showcased its adaptability with different feature representations, maintaining relatively stable performance with both MFCCs and MelSpectrograms. Its ensemble approach notably enhanced the True Negative Rate, underlining its efficacy in minimizing false positives. However, G-MADE generally scored lower in AUC-Score and Balanced Accuracy than VAE, except in the analysis of infant and child respiratory sounds, where it performed comparably well. This observation and its compatibility with MelSpectrogram features suggest G-MADE's potential to handle nuanced temporal information. The ensemble strategy significantly contributes to the model's performance and stability.\\
+
+\begin{table}[h!]
+    \centering
+    \caption{Comparison of Proposed Models with Existing Literature\\(80/20 Split, Test Set)}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Model} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} \\
+    \hline
+    VAE (Ours) & \textbf{0.62} & \textbf{0.61} & \textbf{0.84} & 0.39 \\
+    VAE (Cozzatti et al.)~\cite{cozzatti2022variational} & 0.61 & 0.60 & 0.58 & \textbf{0.61} \\
+    G-MADE (Ensemble) & 0.58 & 0.56 & 0.7 & 0.43 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+
+Reconstruction-based (VAE) and density-estimation-based (G-MADE) show promising respiratory sound anomaly detection capabilities and enable weakly-supervised learning in this domain. However, VAE's superior accuracy, noise robustness, and overall generalization capabilities make it a more suitable choice for this specific application. However, the decision on the model selection should also account for task-specific requirements, such as dataset characteristics and the importance of reducing false positives. 
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

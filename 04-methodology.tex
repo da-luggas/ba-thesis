@@ -25,6 +25,7 @@ To mitigate this, the dataset creators suggested a 60/40 recording-level split w
 By employing both splitting strategies, we aim to align our methodology with existing literature and robustly evaluate our model's performance, particularly regarding data leakage prevention.
 
 \section{Preprocessing}
+\label{method:preprocessing}
 Effective preprocessing is crucial for transforming raw audio data into a format suitable for our machine-learning models. This section outlines the steps taken to achieve this.
 Initially, we loaded audio files, each comprising multiple respiratory cycles, along with their corresponding annotation files. These annotations, indicating each cycle's start and end times and the presence of crackles or wheezes, enabled us to extract individual cycles and assign binary labels (1 for abnormal cycles with crackles or wheezes and 0 for normal cycles).\\
 Given the dataset's variety in sampling rates across different electronic stethoscopes, a uniform sampling rate was necessary. After reviewing literature~\cite{cozzatti2022variational,serbes2018automated} and considering the Nyquist Theorem~\cite{por2019nyquist}, we standardized all audio samples to a 4000 Hz sampling rate. This rate effectively captures wheezing sounds (with significant components below 2000 Hz), ensuring that both wheezes and crackles are accurately represented without aliasing.\\
