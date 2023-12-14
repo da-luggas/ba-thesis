@@ -101,8 +101,8 @@ A high AUC is crucial in medical diagnostics to detect pathologies while avoidin
 \subsubsection{Balanced Accuracy (BALACC)}
 Balanced Accuracy (BALACC) assigns equal importance to correctly identifying anomalies and normal data points. It is calculated as the average of Sensitivity (True Positive Rate) and Specificity (True Negative Rate):
 \[ BALACC=0.5 \times (Sensitivity + Specificity) \]
-This metric is especially useful in scenarios where the dataset is unbalanced, a common occurrence in anomaly detection where anomalies are much rarer than normal samples. In such cases, traditional accuracy metrics can be misleading. For example, consider a dataset where 95\% of the data points are normal and only 5\% are anomalies. A model that naively classifies every data point as normal would achieve a 95\% accuracy rate, which is misleadingly high. Balanced accuracy corrects this distortion by considering both the ability to detect anomalies (sensitivity) and recognize normal instances (specificity), providing a more truthful measure of a model's performance. In our example, it would only result in a 50\% balanced accuracy.\\
-Balanced accuracy has a goal similar to the AUC's: correctly identifying diseased and healthy individuals.
+This metric is especially useful in scenarios where the dataset is unbalanced, a common occurrence in anomaly detection where anomalies are much rarer than normal samples. In such cases, traditional accuracy metrics can be misleading. For example, consider a dataset where 95\% of the data points are normal and only 5\% are anomalies. A model that naively classifies every data point as normal would achieve a 95\% accuracy rate, which is misleadingly high. Balanced Accuracy corrects this distortion by considering both the ability to detect anomalies (sensitivity) and recognize normal instances (specificity), providing a more truthful measure of a model's performance. In our example, it would only result in a 50\% Balanced Accuracy.\\
+Balanced Accuracy has a goal similar to the AUC's: correctly identifying diseased and healthy individuals.
 
 
 

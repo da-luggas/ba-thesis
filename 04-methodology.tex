@@ -5,15 +5,8 @@
 
 \section{Dataset}
 \subsection{Definition}
-The Respiratory Sound Database was established for the 2017 International Conference on Biomedical Health Informatics~\cite{rocha2018alpha}. It comprises an open-access collection of audio recordings from 126 patients captured via electronic stethoscopes. These recordings encompass a diverse patient demographic, varying in sex and age, and were obtained using different recording devices amid typical clinical environmental noise.\\
-The dataset includes individuals both with and without respiratory diseases. It features explicitly patients diagnosed with one of three conditions: Chronic Obstructive Pulmonary Disease (COPD), Lower Respiratory Tract Infection (LRTI), and Upper Respiratory Tract Infection (URTI). Nine hundred twenty recordings were gathered, amounting to 5.5 hours of audio, with individual recordings ranging from 10 to 90 seconds. Each recording contains multiple breathing cycles, encompassing both inhalation and exhalation, and these cycles may be normal or exhibit signs of anomalies such as wheezes or crackles.\\\\
-\textbf{Crackles} are brief, sharp, non-melodic sounds typically heard during inhalation but can also occur during exhalation. They are categorized into two subtypes:
-\begin{itemize}
-    \item Fine crackles are high-pitched, short sounds lasting about five milliseconds and associated with fluid in small airways.
-    \item Coarse crackles are lower-pitched, longer sounds lasting about 15 milliseconds, indicating disruptions in larger airways.
-\end{itemize}
-
-\textbf{Wheezes} are longer, distinctive sounds, often exceeding 100 milliseconds. Their musical tone is apparent, presenting as sinusoidal waves in sound analyses. These waves predominantly fall within the 100 to 1000 Hz frequency range, sometimes producing harmonics above~\cite{bohadana2014fundamentals}.\\\\
+The Respiratory Sound Database was established for the 2017 International Conference on Biomedical Health Informatics~\cite{rocha2018alpha}. It comprises an open-access collection of audio recordings from 126 patients captured via electronic stethoscopes. These recordings encompass a diverse patient demographic, varying in sex and age, and were obtained using different recording devices containing typical clinical environmental noise.\\
+The dataset includes individuals both with and without respiratory diseases. It features explicitly patients diagnosed with one of three conditions: Chronic Obstructive Pulmonary Disease (COPD), Lower Respiratory Tract Infection (LRTI), and Upper Respiratory Tract Infection (URTI). Nine hundred twenty recordings were gathered, amounting to 5.5 hours of audio, with individual recordings ranging from 10 to 90 seconds. Each recording contains multiple breathing cycles, encompassing both inhalation and exhalation, and these cycles may be normal or exhibit signs of anomalies such as wheezes or crackles.\\
 In the entire dataset, domain experts annotated 6.898 respiratory cycles. Among these, 3.642 cycles show no anomalies, 1.864 contain crackles, 886 feature wheezes, and 506 simultaneously exhibit both crackles and wheezes.
 
 \subsection{Data Splitting}
@@ -45,9 +38,9 @@ The Variational Autoencoder (VAE) serves as our reconstruction-based model. It i
 \textbf{Decoder}: The Decoder mirrors the Encoder, comprising five convolutional layers. The activation function is replaced with standard ReLU and the last convolutional layer, as it is the output layer of the Decoder, does not use batch normalization and has linear output activation. A linear layer initially processes the latent space sample, reshaping it for compatibility with the convolutional layers.\\\\
 \textbf{Initialization and Loss Function}: We initialize all layer weights using the Xavier method. We combine mean squared error (MSE) loss for the reconstruction error and the Kullback-Leibler divergence (KLD) for a measurement of how well the output distribution of the Encoder aligns with the standard Gaussian distribution. The final loss is the weighted sum of both losses $Loss=\alpha \cdot MSE + (\alpha - 1) \cdot KLD$, with $\alpha$ as the weight.
 
-\subsection{Implementation of the G-MADE}
-The Group Makes Autoencoder for Density Estimation (G-MADE) represents our alternative model for respiratory sound anomaly detection, operating on the principles of autoregressive density estimation.\\\\
-\textbf{Model Architecture}: At its core, G-MADE uses a modified linear autoencoder structure, where we replace the traditional linear layers with MaskedLinear layers that add the functionality for a configurable weight mask to enforce the autoregressive property. The model is constructed as a feed-forward network with several MaskedLinear layers followed by ReLU activation functions. The final output layer omits the ReLU activation for linear output.
+\subsection{Implementation of the GMADE}
+The Group Makes Autoencoder for Density Estimation (GMADE) represents our alternative model for respiratory sound anomaly detection, operating on the principles of autoregressive density estimation.\\\\
+\textbf{Model Architecture}: At its core, GMADE uses a modified linear autoencoder structure, where we replace the traditional linear layers with MaskedLinear layers that add the functionality for a configurable weight mask to enforce the autoregressive property. The model is constructed as a feed-forward network with several MaskedLinear layers followed by ReLU activation functions. The final output layer omits the ReLU activation for linear output.
 \begin{lstlisting}[language=Python,caption={MaskedLinear PyTorch implementation as described by Karpathy, Andrej (2018)~\cite{githubMADE}}]
     class MaskedLinear(nn.Linear):    
         def __init__(self, in_features, out_features, bias=True):
@@ -92,6 +85,6 @@ The Group Makes Autoencoder for Density Estimation (G-MADE) represents our alter
         for l,m in zip(layers, masks):
             l.set_mask(m)
 \end{lstlisting}
-\textbf{Loss Function}: We used the Gaussian Negative Log Likelihood (GaussianNLL) for training G-MADE. This choice aligns with the model's focus on density estimation, as it effectively measures how well the model predicts the probability distribution of the output given the input.
+\textbf{Loss Function}: We used the Gaussian Negative Log Likelihood (GaussianNLL) for training GMADE. This choice aligns with the model's focus on density estimation, as it effectively measures how well the model predicts the probability distribution of the output given the input.
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
