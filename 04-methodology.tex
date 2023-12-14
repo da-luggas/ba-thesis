@@ -13,6 +13,14 @@ In the entire dataset, domain experts annotated 6.898 respiratory cycles. Among 
 \label{method:data-splitting}
 We divided the dataset into training, validation, and test sets for a semi-supervised learning approach and to assess model generalization. Following the common practice in the 2017 ICBHI Challenge literature, we adopted an 80/20 split between training and test data, focusing on individual breathing cycles. This split ensures comparability with previous studies.
 Initially, the dataset underwent a random split, stratified to maintain equal proportions of normal and anomalous samples, resulting in separate training and test sets. Subsequently, the training set was further divided by performing another stratified random split, with 20\% forming the validation set and the remaining 80\% left in the training set cleared of anomalous data to consist solely of normal breathing cycles. We used \lstinline{train_test_split} from the scikit-learn library~\cite{pedregosa2011scikit} to conduct those splits.\\
+
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/split}
+    \caption{
+    Visualization of the random 80/20 data split. The red data points get discarded
+}
+\end{figure}
+
 We acknowledge the limitations of this approach. Notably, excluding 2.084 anomalous samples from the training set might affect the model's generalization ability. While reallocating these to the validation or test sets could improve generalization assessment, it raises concerns about data imbalance. Additionally, the initial splitting at the breathing cycle level poses a risk of data leakage, as cycles from the same recording could be distributed across training and test sets, potentially overestimating model performance metrics.\\
 To mitigate this, the dataset creators suggested a 60/40 recording-level split where a patient's recording can only appear in either data split. We adopted a similar recording-level split, but we allocated 80\% for training and 20\% for testing to keep enough information available in the unsupervised mode. While ensuring a big enough training dataset even after removing anomalous data, this approach also minimizes data leakage.\\
 By employing both splitting strategies, we aim to align our methodology with existing literature and robustly evaluate our model's performance, particularly regarding data leakage prevention.

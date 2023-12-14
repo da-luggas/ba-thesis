@@ -45,7 +45,13 @@ A similar approach can be used in breathing sound analysis. The different anomal
 Cozzatti et al. (2022)~\cite{cozzatti2022variational} explored the first anomaly detection approach to the respiratory sound database. Their work used MFCCs as features, and the breathing cycles containing wheezes, crackles, or both were all summarized in an anomaly class. A Variational Autoencoder (VAE) was trained using only known healthy breathing cycles.\\
 Variational Autoencoders are similar to Autoencoders, consisting of an encoder and a decoder part. By comparison, the encoder of a VAE uses variational inference to output the parameters of a continuous and easily sampled distribution, usually the mean and standard deviation of a  Gaussian~\cite{cozzatti2022variational}. As a result, the input to the decoder is a single sample from that predicted distribution. This allows the model to provide a measure of certainty of the reconstructed data using the variability of the latent space~\cite{an2015variational}.\\
 
-% Maybe include an illustration of VAE?
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/vae}
+    \caption{
+    Architecture of VAE, sampling into latent space z from Gaussian distribution
+}
+\end{figure}
+
 
 Training the VAE with normal sounds only teaches it to reconstruct physiological respiratory cycles accurately. The reconstruction error reported by the model is small in this case. When the model attempts to reconstruct a respiratory sound with pathologies, the parameters of the Gaussian will most likely not match the parameters of the learned distribution of healthy sounds. Thus, the reconstruction will have a higher error. The paper then used a small subset of the original dataset containing healthy and unhealthy lung sounds to determine a threshold in the reconstruction error above which all higher errors should be marked as anomalous, making the process weakly supervised. The proposed model achieved competitive results in the binary class problem, with a Balanced Accuracy of 0.57 for the official 60/40 split and 0.6 for a random 80/20 split.
 
