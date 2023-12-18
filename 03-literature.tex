@@ -43,13 +43,14 @@ A similar approach can be used in breathing sound analysis. The different anomal
 
 \section{Variational Autoencoders}
 Cozzatti et al. (2022)~\cite{cozzatti2022variational} explored the first anomaly detection approach to the respiratory sound database. Their work used MFCCs as features, and the breathing cycles containing wheezes, crackles, or both were all summarized in an anomaly class. A Variational Autoencoder (VAE) was trained using only known healthy breathing cycles.\\
-Variational Autoencoders are similar to Autoencoders, consisting of an encoder and a decoder part. By comparison, the encoder of a VAE uses variational inference to output the parameters of a continuous and easily sampled distribution, usually the mean and standard deviation of a  Gaussian~\cite{cozzatti2022variational}. As a result, the input to the decoder is a single sample from that predicted distribution. This allows the model to provide a measure of certainty of the reconstructed data using the variability of the latent space~\cite{an2015variational}.\\
+Variational Autoencoders are similar to Autoencoders, consisting of an encoder and a decoder part (\autoref{fig:archvae}). By comparison, the encoder of a VAE uses variational inference to output the parameters of a continuous and easily sampled distribution, usually the mean and standard deviation of a  Gaussian~\cite{cozzatti2022variational}. As a result, the input to the decoder is a single sample from that predicted distribution. VAEs still rely on the reconstruction error between the input to the encoder and the decoder output. However, they can use the variability of the stochastic latent space for the sampling in the decoder, providing a measure of certainty of the reconstructed data~\cite{an2015variational}.\\
 
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{images/vae}
     \caption{
     Architecture of VAE, sampling into latent space z from Gaussian distribution
 }
+\label{fig:archvae}
 \end{figure}
 
 

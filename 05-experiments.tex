@@ -3,10 +3,35 @@
 \cleardoubleoddpage%  Make sure to start each chapter on a new odd page
 \chapter{Experiments and Results}
 \section{Experimental Setup}
-We conducted our experiments on a machine equipped with an AMD Ryzen 5 1600 CPU and a NVIDIA GeForce GTX 1070 GPU. The initial step involved establishing a baseline performance to later asses both models under various conditions. We utilized the PyTorch framework~\cite{paszke2019pytorch} for training, taking advantage of its pre-built functions for neural network training. The Adam optimizer was employed throughout the training processes, along with the \lstinline{ReduceLROnPlateau} learning rate scheduler set to a patience of 5 epochs. Additionally, we implemented early stopping, evaluating the model's performance on the validation set after each training epoch, with a patience threshold of 10 epochs.\\
+We conducted our experiments on a machine equipped with an AMD Ryzen 5 1600 CPU and a NVIDIA GeForce GTX 1070 GPU running Ubuntu 23.04. The initial step involved establishing a baseline performance to later asses both models under various conditions. We utilized the PyTorch framework~\cite{paszke2019pytorch} for training, taking advantage of its pre-built functions for neural network training. The Adam optimizer was employed throughout the training processes, along with the \lstinline{ReduceLROnPlateau} learning rate scheduler set to a patience of 5 epochs. Additionally, we implemented early stopping, evaluating the model's performance on the validation set after each training epoch, with a patience threshold of 10 epochs.\\
 For optimal baseline determination, we used the Optuna framework~\cite{akiba2019optuna} for hyperparameter optimization. The objectives included maximizing the AUC-Score and Balanced Accuracy on the validation set while minimizing the epochs required to achieve respectable results. This process yielded the following hyperparameters for our models:\\\\
-\textbf{VAE}: The optimal batch size was determined to be 32, with a learning rate of 1e-4. The \textit{nf} hyperparameter in the DCGAN architecture, which affects the depth of feature maps in both the generator and discriminator, was found to be most effective at 128. The size of the latent space vector was set to 128, and the alpha weighting factor balancing the Mean Squared Error loss and the Kullback-Leibler Divergence was adjusted to 0.5.\\\\
+\textbf{VAE}: The optimal batch size was determined to be 32, with a learning rate of 1e-4. The \textit{nf} hyperparameter in the DCGAN architecture (see \autoref{code:decoder}), which affects the depth of feature maps in both the generator and discriminator, was found to be most effective at 128. The size of the latent space vector was set to 128, and the alpha weighting factor balancing the Mean Squared Error loss and the Kullback-Leibler Divergence was adjusted to 0.5.\\\\
 \textbf{GMADE}: A batch size of 128 and a learning rate of 1e-3 were optimal for this model. Using a single mask configuration without resampling the mask during training, we achieved the best results with a hidden layer structure of [256, 156, 512].
+\begin{lstlisting}[label=code:decoder,language=Python,caption={Overview of the decoder architecture with nc (number of input channels), nz (size of latent space) and nf (depth of feature maps)}]
+    class Decoder(nn.Module):
+    def __init__(self, nc, nz, nf):
+        super(Decoder, self).__init__()
+        self.lin2conv = nn.Linear(nz, nf * 16 * 4, bias=False)
+        self.main = nn.Sequential(
+            nn.ConvTranspose1d(nf * 16, nf * 8, 4, 2, 1, bias=False),
+            nn.BatchNorm1d(nf * 8),
+            nn.ReLU(True),
+
+            nn.ConvTranspose1d(nf * 8, nf * 4, 4, 2, 1, bias=False),
+            nn.BatchNorm1d(nf * 4),
+            nn.ReLU(True),
+
+            nn.ConvTranspose1d(nf * 4, nf * 2, 4, 2, 1, bias=False),
+            nn.BatchNorm1d(nf * 2),
+            nn.ReLU(True),
+
+            nn.ConvTranspose1d(nf * 2, nf, 4, 2, 1, bias=False),
+            nn.BatchNorm1d(nf),
+            nn.ReLU(True),
+
+            nn.ConvTranspose1d(nf, nc, 4, 2, 1, bias=False)
+        )
+\end{lstlisting}
 \section{Generalization Capabilities}
 The ability of a machine learning model to generalize to unseen data is as crucial as its performance during training. We evaluated the generalization of our models using the test set, as described in \autoref{method:data-splitting}, with an 80/20 split. We assessed all three input orderings and their mean ensemble for the GMADE model.\\
 We established a binary classification threshold based on anomaly scores to gauge the Balanced Accuracy, True Positive Rate (TPR), and True Negative Rate (TNR). This threshold was determined using the validation set, which includes some anomalous data. We tested each anomaly score as a potential threshold, selecting the one that maximized Balanced Accuracy on the validation set. This approach underpins the weakly-supervised aspect of our methodology.
@@ -23,35 +48,41 @@ We established a binary classification threshold based on anomaly scores to gaug
     & BALACC  & \textbf{0.61} & \textbf{0.61} \\
     & TPR     & 0.84 & 0.84 \\
     & TNR     & 0.39 & 0.39 \\
+    & STD     & 106.86 & 107.35 \\
     \hline
     \multirow{4}{*}{GMADE (Forward)}
     & ROC-AUC & 0.59 & 0.57 \\
     & BALACC  & 0.57 & 0.57 \\
     & TPR     & \textbf{0.90} & \textbf{0.90} \\
     & TNR     & 0.24 & 0.24 \\
+    & STD     & 48.24 & 52.00 \\
     \hline
     \multirow{4}{*}{GMADE (Backward)}
     & ROC-AUC & 0.58 & 0.57 \\
     & BALACC  & 0.57 & 0.57 \\
     & TPR     & 0.78 & 0.78 \\
     & TNR     & 0.36 & 0.37 \\
+    & STD     & 16.88 & 17.00 \\
     \hline
     \multirow{4}{*}{GMADE (Mid-Frame)}
     & ROC-AUC & 0.56 & 0.55 \\
     & BALACC  & 0.56 & 0.57 \\
     & TPR     & 0.86 & 0.86 \\
     & TNR     & 0.27 & 0.29 \\
+    & STD     & 82.14 & 256.00 \\
     \hline
     \multirow{4}{*}{GMADE (Ensemble)}
     & ROC-AUC & 0.59 & 0.58 \\
     & BALACC  & 0.57 & 0.56 \\
     & TPR     & 0.71 & 0.70 \\
     & TNR     & \textbf{0.42} & \textbf{0.43} \\
+    & STD     & 27.12 & 28.94 \\
     \hline
     \end{tabular}
+    \label{fig:generalization}
 \end{table}
 
-Our performance results indicate that with its reconstruction-based approach, the Variational Autoencoder (VAE) slightly outperforms the GMADE models in accuracy and AUC-Score. However, all models show a notable number of false positives, possibly due to the high environmental noise in the recordings the models assume to be anomalies. The ensemble GMADE model demonstrated the highest TNR, indicating a better balance in minimizing false positives while identifying healthy patients. Interestingly, while the ensemble improved the TNR and the AUC-Score marginally, it did not enhance the Balanced Accuracy compared to individual orderings due to the lower TPR.\\
+Our performance results (\autoref{fig:generalization}) indicate that with its reconstruction-based approach, the Variational Autoencoder (VAE) slightly outperforms the GMADE models in accuracy and AUC-Score. However, all models show a notable number of false positives, possibly due to the high environmental noise in the recordings the models assume to be anomalies. The ensemble GMADE model demonstrated the highest TNR, indicating a better balance in minimizing false positives while identifying healthy patients. Interestingly, while the ensemble improved the TNR and the AUC-Score marginally, it did not enhance the Balanced Accuracy compared to individual orderings due to the lower TPR. The standard deviation (STD) of the predictions of the GMADE variants is consistently lower than that of VAE. This could indicate VAE's ability to fit the data's variability better. The only exception is the mid-frame ordered GMADE, which has a much higher STD for the test set than the validation set, hinting at a possible overfitting to the validation set.\\
 All models are competitive to the weakly-supervised approach introduced by~\cite{cozzatti2022variational} and allow for a more nuanced inspection of the capabilities of the models.
 \section{Age and Gender Differences in Model Accuracy}
 Machine learning algorithms often suffer from imbalances in gender representation, mainly due to insufficient data from females, youths, and older individuals. This imbalance is critical in medical applications where fairness across different genders and age groups must be assured. To address this, we evaluated our models' performance on various subgroups within our dataset, using thresholds established as previously described.\\
@@ -73,14 +104,15 @@ Machine learning algorithms often suffer from imbalances in gender representatio
     GMADE (Ensemble) & 0.56 & 0.59 & 0.56 & 0.56 & 0.68 & 0.7 & \textbf{0.44} & \textbf{0.42} \\
     \hline
     \end{tabular}
+    \label{fig:gender}
 \end{table}
 All models, except the ensemble GMADE, display reduced accuracy for female recordings. Interestingly, the ensemble GMADE maintains equal Balanced Accuracy across genders, although it exhibits a slightly lower AUC-Score for females. Among all models, the VAE consistently performs better in both male and female subsets. However, the difference in its accuracy between genders is more pronounced than in the ensemble GMADE. Despite achieving a high True Positive Rate, the forward-ordered GMADE tends to generate many false positives. In contrast, the Ensemble achieves the highest True Negative Rate (TNR).\\
-This observed discrepancy in gender-based accuracy is likely due to an imbalance in the dataset composition. Of the 6.898 recorded breathing cycles, 4.485 originate from male patients, while only 2.413 are from female patients, suggesting a potential bias in data representation.\\\\
+This observed discrepancy in gender-based accuracy (\autoref{fig:gender}) is likely due to an imbalance in the dataset composition. Of the 6.898 recorded breathing cycles, 4.485 originate from male patients, while only 2.413 are from female patients, suggesting a potential bias in data representation.\\\\
 \textbf{Age}: We categorized recordings into three age groups: (0-7], (7-70], and (70-85]. These groups were chosen for their comparative size and representativeness, with the youngest patient being less than a year old and the oldest at 85.
 
 \begin{table}[h!]
     \centering
-    \caption{Performance by Age Group for VAE and GMADE Models}
+    \caption{Performance by Age Group for VAE and GMADE Models. Highest results indicated by parenthesis}
     \begin{tabular}{|l|l|c|c|c|c|}
     \hline
     \textbf{Age Group} & \textbf{Model} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} \\
@@ -107,9 +139,10 @@ This observed discrepancy in gender-based accuracy is likely due to an imbalance
     & GMADE (Ensemble) & 0.52 & 0.54 & 0.73 & \textbf(0.35) \\
     \hline
     \end{tabular}
+    \label{fig:ages}
 \end{table}
 
-A distinct pattern emerges: almost all models struggle with recordings from the (0-7] age group. Unlike older age groups, where anomalies are detected more reliably but with higher false positives, younger patients' anomalies are often missed, while normal conditions are identified more accurately. The exception is the ensemble GMADE, which is still able to achieve a respectable accuracy in the youngest group, outperforming all individual orderings and VAE. In the older groups, VAE is performing better than GMADE.\\
+A distinct pattern emerges in \autoref{fig:ages}: almost all models struggle with recordings from the (0-7] age group. Unlike older age groups, where anomalies are detected more reliably but with higher false positives, younger patients' anomalies are often missed, while normal conditions are identified more accurately. The exception is the ensemble GMADE, which is still able to achieve a respectable accuracy in the youngest group, outperforming all individual orderings and VAE. In the older groups, VAE is performing better than GMADE.\\
 The difficulty in analyzing younger patients' data could stem from their faster breathing cycles compared to older subjects. The average cycle length for patients older than seven is 2.37 seconds, while for those seven or younger, it is 1.64 seconds, potentially making anomalous sounds too short for effective detection.
 
 \section{Model Sensitivity to Noise}
@@ -120,54 +153,60 @@ Our investigation began with an SNR of 30 dB, where the original signal was domi
     \caption{
     Balanced Accuracy vs SNR Noise Level for Different Models
 }
+\label{fig:balaccsnr}
 \end{figure}
 
-As anticipated, the Balanced Accuracy of all models decreases with increasing noise. While we observed near-original performance at 30 dB SNR, a significant drop is noticeable at 20dB for all GMADE models. Interestingly, the VAE could keep the same accuracy at 20dB SNR compared to 30dB SNR and performs best at these levels of noise. However, all models fail to have meaningful separation power from 10dB SNR.\\
+As anticipated, \autoref{fig:balaccsnr} shows the Balanced Accuracy of all models decreases with increasing noise. While we observed near-original performance at 30 dB SNR, a significant drop is noticeable at 20dB for all GMADE models. Interestingly, the VAE could keep the same accuracy at 20dB SNR compared to 30dB SNR and performs best at these levels of noise. However, all models fail to have meaningful separation power from 10dB SNR.\\
 It is noteworthy that the original signal already contained substantial environmental noise. Nevertheless, the VAE seems to be more robust against noise in the sound signal.
 \section{Model Performance on Crackles and Wheezes}
 The ability to distinguish between crackles and wheezes is vital in diagnosing different respiratory conditions, given their distinct acoustic characteristics. To assess this, we modified the test set to evaluate performance with crackles and wheezes separately, alongside healthy sounds.
 
 \begin{table}[h!]
     \centering
-    \caption{Model Performance for Crackles and Wheezes}
+    \caption{Model Performance for Crackles and Wheezes. FW: Forward, BW: Backward, MF: Mid-Frame, EN: Ensemble, ROC: ROC-AUC, BLC: BALACC}
     \begin{tabular}{|l|c|c|c|c||c|c|c|c|}
     \hline
     & \multicolumn{4}{c||}{\textbf{Crackles}} & \multicolumn{4}{c|}{\textbf{Wheezes}} \\
     \cline{2-9}
-    \textbf{Model} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} & \textbf{ROC-AUC} & \textbf{BALACC} & \textbf{TPR} & \textbf{TNR} \\
+    \textbf{Model} & \textbf{ROC} & \textbf{BLC} & \textbf{TPR} & \textbf{TNR} & \textbf{ROC} & \textbf{BLC} & \textbf{TPR} & \textbf{TNR} \\
     \hline
     VAE & \textbf{0.60} & \textbf{0.60} & 0.81 & 0.38 & \textbf{0.64} & \textbf{0.61} & 0.84 & 0.37 \\
-    GMADE (Forward) & 0.55 & 0.57 & \textbf{0.91} & 0.24 & 0.57 & 0.55 & 0.87 & 0.23 \\
-    GMADE (Backward) & 0.55 & 0.56 & 0.75 & 0.36 & 0.59 & 0.59 & 0.82 & 0.37 \\
-    GMADE (Mid-Frame) & 0.53 & 0.56 & 0.84 & 0.29 & 0.58 & 0.57 & \textbf{0.86} & 0.29 \\
-    GMADE (Ensemble) & 0.57 & 0.56 & 0.7 & \textbf{0.43} & 0.57 & 0.55 & 0.67 & \textbf{0.43} \\
+    GMADE (FW) & 0.55 & 0.57 & \textbf{0.91} & 0.24 & 0.57 & 0.55 & 0.87 & 0.23 \\
+    GMADE (BW) & 0.55 & 0.56 & 0.75 & 0.36 & 0.59 & 0.59 & 0.82 & 0.37 \\
+    GMADE (MF) & 0.53 & 0.56 & 0.84 & 0.29 & 0.58 & 0.57 & \textbf{0.86} & 0.29 \\
+    GMADE (EN) & 0.57 & 0.56 & 0.7 & \textbf{0.43} & 0.57 & 0.55 & 0.67 & \textbf{0.43} \\
     \hline
     \end{tabular}
+    \label{fig:crackleswheezes}
 \end{table}
 
-The results do not indicate a clear trend between the performance for wheezes and crackles. While the AUC-Scores for wheezes is higher than those for crackles, the Balanced Accuracy does not confirm this tendency. Among the GMADE models, backward ordering performs most effectively on wheezes, whereas forward ordering is most effective on crackles. Notably, the VAE model consistently achieves the highest accuracy for wheezes and crackles. Interestingly, as seen in previous tests, the ensemble GMADE exhibits the highest True Negative Rate (TNR) for both crackles and wheezes.\\
+The results in \autoref{fig:crackleswheezes} do not indicate a clear trend between the performance for wheezes and crackles. While the AUC-Scores for wheezes is higher than those for crackles, the Balanced Accuracy does not confirm this tendency. Among the GMADE models, backward ordering performs most effectively on wheezes, whereas forward ordering is most effective on crackles. Notably, the VAE model consistently achieves the highest accuracy for wheezes and crackles. Interestingly, as seen in previous tests, the ensemble GMADE exhibits the highest True Negative Rate (TNR) for both crackles and wheezes.\\
 Considering the dataset distribution of 1.864 crackles to 886 wheezes, it is intriguing that the models perform similar across crackles and wheezes despite their substantially lower representation. It shows that the models are able to detect both respiratory phenomena.
 
 \section{Impact of Hyperparameter Variations}
-Optimizing hyperparameters is a crucial yet challenging task in machine learning model training. We utilized the Optuna optimization framework for our models, conducting 30 studies for each model to analyze the relative importance of various hyperparameters in achieving high Balanced Accuracy. A higher value indicates greater importance, suggesting that a modification in that hyperparameter would significantly impact the results.
+Optimizing hyperparameters is a crucial yet challenging task in machine learning model training. We utilized the Optuna optimization framework for our models, conducting 30 studies for each model to analyze the relative importance of various hyperparameters in achieving high Balanced Accuracy. We chose the Tree-structured Parzen Estimator \lstinline{TPESampler} as our sampling algorithm. This algorithm is a Bayesian optimizer that treats each parameter separately and creates two groups for each study: One group is the Gaussian Mixture Model (GMM) for the best hyperparameter values $l(x)$ and another GMM for all other values $g(x)$. It then chooses the parameters $x$ to maximize $l(x)/g(x)$~\cite{optuna2014doc}.
+
+A higher value indicates greater importance, suggesting that a modification in that hyperparameter would significantly impact the results.
 
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{images/importances_vae}
     \caption{
     Hyperparameter performance in VAE training
 }
+\label{fig:hpvae}
 \end{figure}
 
-In the case of the Variational Autoencoder (VAE), the most influential factor is the \lstinline{alpha} weighting term, which balances the Mean Square Error and Kullback-Leibler Divergence in the overall loss function. The \lstinline{beta1} parameter of the Adam optimizer and the dimension of the latent vector (\lstinline{nz}) also play significant roles. Interestingly, the \lstinline{nf} parameter, which affects the feature depth in the DCGAN Generator and Discriminator, has a minimal impact on overall model performance.
+In the case of the Variational Autoencoder (VAE) (\autoref{fig:hpvae}), the most influential factor is the \lstinline{alpha} weighting term, which balances the Mean Square Error and Kullback-Leibler Divergence in the overall loss function. The \lstinline{beta1} parameter of the Adam optimizer and the dimension of the latent vector (\lstinline{nz}) also play significant roles. Interestingly, the \lstinline{nf} parameter, which affects the feature depth in the DCGAN Generator and Discriminator, has a minimal impact on overall model performance.
 
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{images/importances_gmade}
     \caption{
     Hyperparameter performance in GMADE (forward) training
 }
+\label{fig:hpgmade}
 \end{figure}
 
-The GMADE model, featuring hyperparameters for its hidden layers, inherently requires more tuning than the VAE. The size of the first hidden layer is paramount in training GMADE, followed by the frequency of mask resampling during forward passes. The subsequent hidden layers, the number of different weight masks, and the frequency of mask resampling per forward pass all show similar and relatively low importance.
+The GMADE model (\autoref{fig:hpgmade}), featuring hyperparameters for its hidden layers, inherently requires more tuning than the VAE. The size of the first hidden layer is paramount in training GMADE, followed by the frequency of mask resampling during forward passes. The subsequent hidden layers, the number of different weight masks, and the frequency of mask resampling per forward pass all show similar and relatively low importance.
 
 \section{Assessment of Data Splitting at Recording Level}
 In line with concerns mentioned in \autoref{method:data-splitting}, splitting data at the breathing cycle level risks overestimating the model generalization capabilities, as cycles from the same patient might appear in training and test sets. To address this, we examined the impact of our custom-designed recording level split on model performance.
@@ -177,9 +216,10 @@ In line with concerns mentioned in \autoref{method:data-splitting}, splitting da
     \caption{
     Model performance on different data split
 }
+\label{fig:split}
 \end{figure}
 
-The results demonstrate effective generalization across models for both data splits. However, an interesting trend can be observed: while the test set performance was marginally lower than the validation set for the breathing cycle level split, it improved for the recording level split. This improvement in the test set performance for the recording level split might be attributed to a fortunate data division, indicating that the split could be unintentionally biased or more representative of the model's capabilities.
+The results in \autoref{fig:split} demonstrate effective generalization across models for both data splits. However, an interesting trend can be observed: while the test set performance was marginally lower than the validation set for the breathing cycle level split, it improved for the recording level split. This improvement in the test set performance for the recording level split might be attributed to a fortunate data division, indicating that the split could be unintentionally biased or more representative of the model's capabilities.
 
 \section{Comparison of Feature Extraction Methods: MFCC vs. MelSpectrogram}
 MFCCs and MelSpectrograms are widespread for representing sound data in machine learning but offer different advantages. MelSpectrograms are known for better human interpretability and retaining more temporal information compared to MFCCs. To evaluate the impact of these differences, we adapted our preprocessing as described in \autoref{method:preprocessing}, replacing \lstinline{torchaudio.transforms.MFCC} with \lstinline{torchaudio.transforms.MelSpectrogram} and retrained all models with the new feature representation.
@@ -222,9 +262,10 @@ MFCCs and MelSpectrograms are widespread for representing sound data in machine 
     & TNR     & 0.68 & 0.63 & 0.22 \\
     \hline
     \end{tabular}
+    \label{fig:melspec}
 \end{table}
 
-Our findings reveal a significant variance in model performance when using MelSpectrograms compared to MFCCs. The Variational Autoencoder (VAE) could not learn any representation of normal data points, as indicated by the accuracy close to random behavior. The forward GMADE model maintains performance close to its MFCC counterpart but shows reduced generalization to the test set. The backward, mid-frame, and ensemble GMADE models suffer notable performance declines, especially in test set generalization.\\
+Our findings in \autoref{fig:melspec} reveal a significant variance in model performance when using MelSpectrograms compared to MFCCs. The Variational Autoencoder (VAE) could not learn any representation of normal data points, as indicated by the accuracy close to random behavior. The forward GMADE model maintains performance close to its MFCC counterpart but shows reduced generalization to the test set. The backward, mid-frame, and ensemble GMADE models suffer notable performance declines, especially in test set generalization.\\
 Incorporating dropout (with $p=0.3$) in the Masked Autoencoder models improved their generalization capabilities. Notably, the forward, ensemble and mid-frame GMADE models approached performances similar to those achieved with MFCCs. However, the backward ordering model failed to benefit from dropout and could not learn any meaningful pattern.\\
 These results suggest that GMADE models possess a degree of flexibility regarding input features, effectively accommodating both MelSpectrograms and MFCCs. However, our implementation of the Variational Autoencoder did not perform as well with MelSpectrograms. This could imply that the VAE architecture is struggling with the level of detail in the MelSpectrogram representation and can not retrieve the characteristics that make up a normal breathing cycle and may be more suited to the feature representation provided by MFCCs due to their compact and efficient encapsulation of relevant sound characteristics. Further refinements in the VAE's architecture or its training process might be needed to handle better the richer temporal information presented by MelSpectrograms.
 

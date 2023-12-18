@@ -7,8 +7,8 @@
 \label{theory:sounds}
 The respiratory system, which includes the airways and lungs, plays a crucial role in gas exchange, a vital function in the human body. Respiratory sounds, created by airflow during breathing, can reveal a lot about respiratory health~\cite{earis1992lung}. These sounds, observed through a process called 'auscultation'—listening to the chest with a stethoscope—are critical for detecting respiratory diseases. This method is cost-effective, non-invasive, and a standard part of physical examinations~\cite{bohadana2014fundamentals}.\\
 We can categorize respiratory sounds into normal and anomalous based on their characteristics during auscultation. Normal sounds are typically heard during inhalation and at the start of exhalation, within a frequency range of 100 to 1000 Hz~\cite{bohadana2014fundamentals}. In contrast, abnormal sounds come in various forms. Here, we will discuss two common types: Wheezes and Crackles.\\\\
-\textbf{Wheezes} are long and musical sounds that last over 100 milliseconds. They occur during inhalation and exhalation, often caused by narrowed or restricted airways. Their frequency usually falls between 100 to 1000 Hz, but higher harmonics are also possible~\cite{bohadana2014fundamentals}.\\\\
-\textbf{Crackles}, conversely, are brief, non-musical sounds that signal sporadic airway openings, often due to secretions. We can further divide them into Fine and Coarse Crackles. Fine Crackles are short, with a frequency of around 650 Hz and a duration of about five milliseconds. Coarse Crackles last longer, over 15 milliseconds, and occur at lower frequencies, below 350 Hz~\cite{bohadana2014fundamentals}.\\\\
+\textbf{Wheezes} are long and harmonical sounds that last over 100 milliseconds. They occur during inhalation and exhalation, often caused by narrowed or restricted airways. Their frequency usually falls between 100 to 1000 Hz, but higher harmonics are also possible~\cite{bohadana2014fundamentals}.\\\\
+\textbf{Crackles}, conversely, are brief, non-musical sounds that signal sporadic airway openings, often due to secretions. We can further divide them into fine and coarse crackles. Fine crackles are short, with a frequency of around 650 Hz and a duration of about five milliseconds. Coarse crackles last longer, over 15 milliseconds, and occur at lower frequencies, below 350 Hz~\cite{bohadana2014fundamentals}.\\\\
 Understanding these distinctions in pulmonary sounds is vital for developing automated systems for their detection. Electronic stethoscopes can convert lung sounds into digital signals, enabling the use of advanced anomaly detection algorithms in computer-aided medical diagnosis.
 
 \subsection{Digital Representation of Sound}
@@ -60,7 +60,7 @@ In anomaly detection, estimating the PDF of a dataset helps identify regions of 
 % Maybe include a graphic showing the distribution
 \subsection{Introduction to Masked Autoencoders}
 \label{theory:made}
-Masked Autoencoders for Distribution Estimation (MADE) extend the concept of autoencoders so that they can understand the data distribution. Unlike traditional autoencoders, MADE enforces the autoregressive property and considers the input data order so that each output part is influenced only by preceding input parts.\\
+Masked Autoencoders for Distribution Estimation (MADE) extend the concept of autoencoders so that they can model the data distribution. Unlike traditional autoencoders, MADE enforces the autoregressive property and considers the input data order so that each output part is influenced only by preceding input parts.\\
 The autoregressive property is accomplished by masking the weights in each autoencoder layer, controlling the information flow. Each neuron is labeled with a number from $1$ to $D-1$ (where $D$ is the input dimensionality) and the following rule is applied to determine allowed connections: a neuron in layer $l$ (called $k'$) can only be connected to a neuron in the previous layer $l-1$ (called $k$) if its label is greater than or equal to the label of $k$. Mathematically, Germain et al. (2015) states this concept as
 \[ M^{\mathbf{W}^l}_{k',k}=\begin{cases}
     1, & \text{if } m^l(k')\geq m^{l-1}(k) \\
@@ -101,9 +101,10 @@ The Area Under the Curve (AUC) is a metric calculated using the Receiver Operati
   \caption{
   ROC curve, highlighting special points and diagonal
 }
+\label{fig:rocauccurve}
 \end{figure}
 
-In this graph, a point at (0,0) signifies a model that categorizes all data as normal, while (1,1) indicates a model labeling everything anomalous. The theoretical perfect model achieves flawless classification, represented by (0,1). The ROC curve emerges by systematically adjusting the model's classification threshold and plotting corresponding TPR and FPR values, forming a curve that illustrates performance across various thresholds~\cite{fawcett2006introduction}.\\
+In \autoref{fig:rocauccurve}, a point at (0,0) signifies a model that categorizes all data as normal, while (1,1) indicates a model labeling everything anomalous. The theoretical perfect model achieves flawless classification, represented by (0,1). The ROC curve emerges by systematically adjusting the model's classification threshold and plotting corresponding TPR and FPR values, forming a curve that illustrates performance across various thresholds~\cite{fawcett2006introduction}.\\
 A random model aligns with the diagonal line from (0,0) to (1,1) in binary classification tasks like anomaly detection. Performance surpasses randomness when the ROC curve lies above this diagonal and diminishes when below. The AUC is a quantitative measure of this performance, quantifying the area enclosed by the ROC curve and the x-axis. It ranges from 0.5 (no discrimination ability) to 1 (perfect classification). Notably, models with an AUC below 0.5 can be adjusted to achieve better-than-random classification.\\
 A high AUC is crucial in medical diagnostics to detect pathologies while avoiding false alarms and overtreatment of healthy patients.
 

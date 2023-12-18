@@ -11,14 +11,14 @@ In the entire dataset, domain experts annotated 6.898 respiratory cycles. Among 
 
 \subsection{Data Splitting}
 \label{method:data-splitting}
-We divided the dataset into training, validation, and test sets for a semi-supervised learning approach and to assess model generalization. Following the common practice in the 2017 ICBHI Challenge literature, we adopted an 80/20 split between training and test data, focusing on individual breathing cycles. This split ensures comparability with previous studies.
+We divided the dataset into training, validation, and test sets for a semi-supervised learning approach and to assess model generalization. Following the common practice in the 2017 ICBHI Challenge literature, we adopted an 80/20 split (\autoref{fig:split}) between training and test data, focusing on individual breathing cycles. This split ensures comparability with previous studies.
 Initially, the dataset underwent a random split, stratified to maintain equal proportions of normal and anomalous samples, resulting in separate training and test sets. Subsequently, the training set was further divided by performing another stratified random split, with 20\% forming the validation set and the remaining 80\% left in the training set cleared of anomalous data to consist solely of normal breathing cycles. We used \lstinline{train_test_split} from the scikit-learn library~\cite{pedregosa2011scikit} to conduct those splits.\\
 
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{images/split}
     \caption{
     Visualization of the random 80/20 data split. The red data points get discarded
-}
+}\label{fig:split}
 \end{figure}
 
 We acknowledge the limitations of this approach. Notably, excluding 2.084 anomalous samples from the training set might affect the model's generalization ability. While reallocating these to the validation or test sets could improve generalization assessment, it raises concerns about data imbalance. Additionally, the initial splitting at the breathing cycle level poses a risk of data leakage, as cycles from the same recording could be distributed across training and test sets, potentially overestimating model performance metrics.\\
@@ -29,7 +29,7 @@ By employing both splitting strategies, we aim to align our methodology with exi
 \label{method:preprocessing}
 Effective preprocessing is crucial for transforming raw audio data into a format suitable for our machine-learning models. This section outlines the steps taken to achieve this.
 Initially, we loaded audio files, each comprising multiple respiratory cycles, along with their corresponding annotation files. These annotations, indicating each cycle's start and end times and the presence of crackles or wheezes, enabled us to extract individual cycles and assign binary labels (1 for abnormal cycles with crackles or wheezes and 0 for normal cycles).\\
-Given the dataset's variety in sampling rates across different electronic stethoscopes, a uniform sampling rate was necessary. After reviewing literature~\cite{cozzatti2022variational,serbes2018automated} and considering the Nyquist Theorem~\cite{por2019nyquist}, we standardized all audio samples to a 4000 Hz sampling rate. This rate effectively captures wheezing sounds (with significant components below 2000 Hz), ensuring that both wheezes and crackles are accurately represented without aliasing.\\
+Given the dataset's variety in sampling rates across different electronic stethoscopes, a uniform sampling rate was necessary. According to similar work~\cite{cozzatti2022variational,serbes2018automated} and considering the Nyquist Theorem~\cite{por2019nyquist}, we standardized all audio samples to a 4000 Hz sampling rate. This rate effectively captures wheezing sounds (with significant components below 2000 Hz), ensuring that both wheezes and crackles are accurately represented without aliasing.\\
 To accommodate the fixed-size input requirement of our models, we normalized the length of respiratory cycles, which ranged from 0.2s to 16.2s, to a consistent 5s. The normalization was achieved by truncating longer sequences and zero-padding shorter ones.\\
 Subsequently, we computed 13 MFCCs for each audio sample using PyTorch's~\cite{paszke2019pytorch} \lstinline{torchaudio.transforms.MFCC} implementation. Adjustments to the underlying spectrogram calculations included setting the number of mels to 64, the size of the fast Fourier transform to 265 with a hop length of 128 and a maximum frequency of 2000 Hz. These parameters align with the implementation of Gairola et al. (2021).\\
 We then applied the \lstinline{torchaudio.transforms.AmplitudeToDB} transformation to scale the amplitude valued logarithmically. The final preprocessing step involved standardizing the MFCCs to have zero mean and unit standard deviation, preparing them for efficient model processing.
@@ -48,8 +48,8 @@ The Variational Autoencoder (VAE) serves as our reconstruction-based model. It i
 
 \subsection{Implementation of the GMADE}
 The Group Makes Autoencoder for Density Estimation (GMADE) represents our alternative model for respiratory sound anomaly detection, operating on the principles of autoregressive density estimation.\\\\
-\textbf{Model Architecture}: At its core, GMADE uses a modified linear autoencoder structure, where we replace the traditional linear layers with MaskedLinear layers that add the functionality for a configurable weight mask to enforce the autoregressive property. The model is constructed as a feed-forward network with several MaskedLinear layers followed by ReLU activation functions. The final output layer omits the ReLU activation for linear output.
-\begin{lstlisting}[language=Python,caption={MaskedLinear PyTorch implementation as described by Karpathy, Andrej (2018)~\cite{githubMADE}}]
+\textbf{Model Architecture}: At its core, GMADE uses a modified linear autoencoder structure, where we replace the traditional linear layers with MaskedLinear layers (\autoref{code:maskedlinear}) that add the functionality for a configurable weight mask to enforce the autoregressive property. The model is constructed as a feed-forward network with several MaskedLinear layers followed by ReLU activation functions. The final output layer omits the ReLU activation for linear output.
+\begin{lstlisting}[label=code:maskedlinear,language=Python,caption={MaskedLinear PyTorch implementation as described by Karpathy, Andrej (2018)~\cite{githubMADE}}]
     class MaskedLinear(nn.Linear):    
         def __init__(self, in_features, out_features, bias=True):
             super().__init__(in_features, out_features, bias)        
@@ -62,8 +62,8 @@ The Group Makes Autoencoder for Density Estimation (GMADE) represents our altern
             return F.linear(input, self.mask * self.weight, self.bias)
 \end{lstlisting}
 
-\textbf{Mask Generation and Update}: A significant aspect of the implementation is the generation and updating of the weight masks as they determine the connections between neurons in subsequent layers. The masks are dynamically generated based on the input ordering and connectivity of neurons and allow for varying ordering strategies, such as causal, backward, and middle frame orderings. The model can generate multiple masks to allow for the ensemble of different neuron connectivities. To illustrate the implementation, we consider the case of just one mask used.
-\begin{lstlisting}[language=Python,caption={PyTorch implementation of the mask generation, adapted from Karpathy, Andrej (2018)~\cite{githubMADE}}]
+\textbf{Mask Generation and Update}: A significant aspect of the implementation is the generation and updating of the weight masks as they determine the connections between neurons in subsequent layers. The masks are dynamically generated based on the input ordering and connectivity of neurons and allow for varying ordering strategies, such as causal, backward, and middle frame orderings. The model can generate multiple masks to allow for the ensemble of different neuron connectivities. To illustrate the implementation in \autoref{code:updatemask}, we consider the case of using one mask.
+\begin{lstlisting}[label=code:updatemask, language=Python,caption={PyTorch implementation of the mask generation, adapted from Karpathy, Andrej (2018)~\cite{githubMADE}}]
     def update_masks(self):
         # define the number of linear layers of the model
         L = len(self.hidden_sizes)

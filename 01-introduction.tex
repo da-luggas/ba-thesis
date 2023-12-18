@@ -2,27 +2,23 @@
 %% 
 \cleardoubleoddpage%  Make sure to start each chapter on a new odd page
 \chapter{Introduction}
-Respiratory diseases are a leading cause of premature mortality worldwide. With over four million annual deaths attributed to these diseases, early identification and treatment efforts are imperative~\cite{ferkol2014global}. The use of chest auscultation, a technique in which respiratory sounds are analyzed with instruments like stethoscopes, is a simple and effective way for diagnosing respiratory diseases. \\
-Automated systems for detecting sound anomalies have become of increasing relevance in the medical field and are driving machine learning research~\cite{bohadana2014fundamentals}. They have the potential to improve diagnostic accuracy for healthcare professionals and provide initial assessments for patients, ultimately leading to more efficient allocation of healthcare resources. 
-% Stethoscope got digital -> automation possible
-% Write about how to spot anomalies in the sounds and how it can be automated
-% Why it is of benefit to use only healthy sounds for training: The importance of semi-supervised learning
-% Mention semi-supervised so I can talk abo∏ut it in preprocessing
 
 \section{Motivation}
-
+Respiratory diseases are a leading cause of premature mortality worldwide. With over four million annual deaths attributed to these diseases, early identification and treatment efforts are imperative~\cite{ferkol2014global}. The use of chest auscultation, a technique in which respiratory sounds are analyzed with instruments like stethoscopes, is a simple and effective way for diagnosing respiratory diseases.\\
+Automated systems for detecting sound anomalies have become of increasing relevance in the medical field and are driving machine learning research~\cite{bohadana2014fundamentals}. They have the potential to improve diagnostic accuracy for healthcare professionals and provide initial assessments for patients, ultimately leading to more efficient allocation of healthcare resources.\\
+A key challenge in this field is the limited availability of data. With growing concerns about privacy, acquiring comprehensive datasets, particularly those involving patient data, takes time and effort. Therefore, developing systems that can function effectively with limited (anomalous) data is incredibly beneficial. This research aims to contribute to advancements in this area.
 
 
 \section{Objectives and Approach}
 
-% Introduce dataset shortly
-% Introduce methods shortly
-% Objectives
-
-% should showcase existing anomaly detection approaches to respiratory sound analysis and give an outlook which methods might work better and which ones to pursue trying out
+The primary goal of this thesis is to evaluate the effectiveness of reconstruction-based and density-estimation-based machine learning methods on respiratory sound data in a semi-supervised context. Specifically, we aim to determine if both approaches can utilize common feature representations for this data type and identify which method is more effective under various conditions. We also want to determine whether existing anomaly detection approaches to respiratory sounds can be improved upon to deliver more accurate predictions or if there is a need for novel datasets specifically designed for training semi-supervised models. \\
+To achieve this, we will employ two distinct machine learning architectures: Variational Autoencoders for the reconstruction-based approach and Grouped Masked Autoencoders for Density Estimation (GMADE) for the density-estimation-based approach. By altering the dataset's distribution, we will create different scenarios to determine whether a particular model is more advantageous for specific patient groups and if they are applicable in real-world situations.
 
 \section{Outline}
-
+This thesis begins by establishing the necessary theoretical background to understand key concepts used throughout the text. We will introduce the dataset utilized in our study, explore digital sound representations, and provide an overview of anomaly detection. Additionally, we will clarify the differences between reconstruction and density estimation approaches.\\
+Subsequently, we will review existing literature to evaluate the current state of research in anomaly detection of respiratory sounds. This includes examining existing models, their performance, and a detailed analysis of papers that introduce the model architectures we will compare. We will also discuss recent research that treats breathing cycle classification as an anomaly detection task.\\
+Following this, our methodology will be detailed. This includes defining the dataset used, describing the preprocessing steps, and outlining the model implementations.\\
+Finally, we will present our experiments, including their setup and results. An analysis of these results will be provided, along with a discussion on practical implications, limitations, and potential directions for future research based on our findings.
 
 
 %% 
