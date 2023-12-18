@@ -216,10 +216,10 @@ In line with concerns mentioned in \autoref{method:data-splitting}, splitting da
     \caption{
     Model performance on different data split
 }
-\label{fig:split}
+\label{fig:splitperf}
 \end{figure}
 
-The results in \autoref{fig:split} demonstrate effective generalization across models for both data splits. However, an interesting trend can be observed: while the test set performance was marginally lower than the validation set for the breathing cycle level split, it improved for the recording level split. This improvement in the test set performance for the recording level split might be attributed to a fortunate data division, indicating that the split could be unintentionally biased or more representative of the model's capabilities.
+The results in \autoref{fig:splitperf} demonstrate effective generalization across models for both data splits. However, an interesting trend can be observed: while the test set performance was marginally lower than the validation set for the breathing cycle level split, it improved for the recording level split. This improvement in the test set performance for the recording level split might be attributed to a fortunate data division, indicating that the split could be unintentionally biased or more representative of the model's capabilities.
 
 \section{Comparison of Feature Extraction Methods: MFCC vs. MelSpectrogram}
 MFCCs and MelSpectrograms are widespread for representing sound data in machine learning but offer different advantages. MelSpectrograms are known for better human interpretability and retaining more temporal information compared to MFCCs. To evaluate the impact of these differences, we adapted our preprocessing as described in \autoref{method:preprocessing}, replacing \lstinline{torchaudio.transforms.MFCC} with \lstinline{torchaudio.transforms.MelSpectrogram} and retrained all models with the new feature representation.
